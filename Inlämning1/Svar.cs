@@ -9,7 +9,7 @@ namespace Inlämning1
     public class Svar
     {
         public string TidigareYrke { get; set; }
-        public int ErfaranhetÅr { get; set; }
+        public int ErfarenhetÅr { get; set; }
         public int FörväntadLön { get; set; }
         public string Projekt { get; set; }
     }

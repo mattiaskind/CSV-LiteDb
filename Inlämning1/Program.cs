@@ -28,12 +28,12 @@ namespace Inlämning1
                     svar.TidigareYrke = columns[1];
                     try
                     {
-                        svar.ErfaranhetÅr = int.Parse(Regex.Replace(columns[2], @"\D", ""));
+                        svar.ErfarenhetÅr = int.Parse(Regex.Replace(columns[2], @"\D", ""));
                     }
                     catch (Exception)
                     {
 
-                        svar.ErfaranhetÅr = 0;
+                        svar.ErfarenhetÅr = 0;
                     }
 
                     try
@@ -52,12 +52,58 @@ namespace Inlämning1
                 }
             }
 
-            var totalFörväntadLön = col.Query().Select(s => s.FörväntadLön).ToList().Sum();
-            var antal = col.Query().Count();
+            var allaSvar = col.FindAll();
+            //foreach (var svar in allaSvar)
+            //{                
+            //    //Console.WriteLine(svar.TidigareYrke == null);
+            //    Console.WriteLine(svar.TidigareYrke + " " + svar.ErfarenhetÅr + " " + svar.FörväntadLön + " " + svar.Projekt);
+            //}
 
-            Console.WriteLine("Sammanlagd förväntad lön: " + totalFörväntadLön);
-            Console.WriteLine("Antal svarande: " + antal);
-            Console.WriteLine("Genomsnittlig förväntad lön: " + totalFörväntadLön / antal);
+
+
+            //Console.WriteLine("Sammanlagd förväntad lön: " + totalFörväntadLön);
+
+
+
+
+            // Svar / analyser
+
+            // Mängd svar
+            Console.WriteLine("---------------------------------");
+            var antalSvar = col.Query().Count();
+            Console.WriteLine("Antal svarande: " + antalSvar);
+
+            // Mängd fullständiga svar (där inget värde == NULL || 0) 
+            Console.WriteLine("---------------------------------");
+            var fullständigaSvar = 0;
+            foreach (var svar in allaSvar)
+            {
+                if (!String.IsNullOrEmpty(svar.TidigareYrke))
+                {
+                    Console.WriteLine(svar.TidigareYrke);
+                    if (svar.ErfarenhetÅr > 0)
+                    {
+                        if (svar.FörväntadLön > 0)
+                        {
+                            if (svar.Projekt != null || svar.Projekt != "")
+                            {
+                                fullständigaSvar++;
+                            }
+                        }
+                    }
+                }
+            }
+            Console.WriteLine("\nAntal fullständiga svar: " + fullständigaSvar);
+
+            // Genomsnittlig yrkeserfarenhet i år
+            Console.WriteLine("---------------------------------");
+
+            // Genomsnittlig förhoppning på lön
+            //var totalFörväntadLön = col.Query().Select(s => s.FörväntadLön).ToList().Sum();
+            //Console.WriteLine("Genomsnittlig förväntad lön: " + totalFörväntadLön / antal);    // <------------ dividera med antal fullständiga svar, dvs inte 0 ?
+
+            // Antal miniräknare+kalkylator
+            // Antal unika projekt
         }
 
     }
