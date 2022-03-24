@@ -12,29 +12,33 @@ namespace Inlämning1
         static void Main(string[] args)
         {
             using var db = new LiteDatabase("formulärsvar.db");
-            var col = db.GetCollection<Svar>("svar");            
+            var col = db.GetCollection<Svar>("svar");
 
+            // Läs in svaren
             using (var reader = new TextFieldParser(@"Jobbintervju15.csv"))
             {
                 reader.SetDelimiters(new string[] { "," });
-                reader.ReadLine(); // Läs och glöm bort första raden
+                reader.ReadLine();
 
                 while (!reader.EndOfData)
                 {
-                    string[] columns = reader.ReadFields();
+                    string[] columns = reader.ReadFields();                    
                     Svar svar = new Svar();
-
+                    
                     svar.TidigareYrke = columns[1];
+                                        
                     try
                     {
+                        // Vi vill att svaret ska vara ett heltal men vi kan inte förvänta oss
+                        // att det alltid är det. 
                         svar.ErfarenhetÅr = int.Parse(Regex.Replace(columns[2], @"\D", ""));
                     }
                     catch (Exception)
                     {
-
+                        // Om svaret inte går att omvandla till ett heltal ge det värdet 0
                         svar.ErfarenhetÅr = 0;
                     }
-
+                    // Samma som ovan
                     try
                     {
                         svar.FörväntadLön = int.Parse(Regex.Replace(columns[3], @"\D", ""));
@@ -47,14 +51,14 @@ namespace Inlämning1
                     
                     svar.Projekt = columns[4];
 
-                    // Kör den här en gång och kommentera därefter ut den.
+                    // Nedanstående rad lägger in svaret i databasen. Kommentera ut raden efter första körningen.
                     //col.Insert(svar);
                 }
             }
 
             // Svar / analyser
 
-            // Mängd svar
+            // Totalt antal svarande
             Console.WriteLine("---------------------------------");
             var antalSvar = col.Query().Count();
             Console.WriteLine("Antal svarande: " + antalSvar);
