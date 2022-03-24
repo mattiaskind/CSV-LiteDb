@@ -7,13 +7,12 @@ using System.Text.RegularExpressions;
 
 namespace Inlämning1
 {
-
     internal class Program
     {
         static void Main(string[] args)
         {
             using var db = new LiteDatabase("formulärsvar.db");
-            var col = db.GetCollection<Svar>("svar");
+            var col = db.GetCollection<Svar>("svar");            
 
             using (var reader = new TextFieldParser(@"Jobbintervju15.csv"))
             {
@@ -48,23 +47,10 @@ namespace Inlämning1
                     
                     svar.Projekt = columns[4];
 
+                    // Kör den här en gång och kommentera därefter ut den.
                     //col.Insert(svar);
                 }
             }
-
-            var allaSvar = col.FindAll();
-            //foreach (var svar in allaSvar)
-            //{                
-            //    //Console.WriteLine(svar.TidigareYrke == null);
-            //    Console.WriteLine(svar.TidigareYrke + " " + svar.ErfarenhetÅr + " " + svar.FörväntadLön + " " + svar.Projekt);
-            //}
-
-
-
-            //Console.WriteLine("Sammanlagd förväntad lön: " + totalFörväntadLön);
-
-
-
 
             // Svar / analyser
 
@@ -73,38 +59,48 @@ namespace Inlämning1
             var antalSvar = col.Query().Count();
             Console.WriteLine("Antal svarande: " + antalSvar);
 
-            // Mängd fullständiga svar (där inget värde == NULL || 0) 
+            // Mängd fullständiga svar (där inget värde == NULL || 0)             
             Console.WriteLine("---------------------------------");
-            var fullständigaSvar = 0;
-            foreach (var svar in allaSvar)
-            {
-                if (!String.IsNullOrEmpty(svar.TidigareYrke))
-                {
-                    Console.WriteLine(svar.TidigareYrke);
-                    if (svar.ErfarenhetÅr > 0)
-                    {
-                        if (svar.FörväntadLön > 0)
-                        {
-                            if (svar.Projekt != null || svar.Projekt != "")
-                            {
-                                fullständigaSvar++;
-                            }
-                        }
-                    }
-                }
-            }
-            Console.WriteLine("\nAntal fullständiga svar: " + fullständigaSvar);
+
+            var fullständigaSvar = col.Find(Query.And(Query.Not("TidigareYrke", null), Query.Not("ErfarenhetÅr", 0), Query.Not("FörväntadLön", 0)));
+            Console.WriteLine("Antal fullständiga svar: " + fullständigaSvar.Count());
+
+            //foreach (var svar in fullständigaSvar)
+            //{
+            //    Console.WriteLine(svar.TidigareYrke + " " + svar.ErfarenhetÅr + " " + svar.FörväntadLön + " " + svar.Projekt);   
+            //}
 
             // Genomsnittlig yrkeserfarenhet i år
             Console.WriteLine("---------------------------------");
+            double summaYrkeserfarenhet = col.Find(Query.All("ErfarenhetÅr")).Sum(x => x.ErfarenhetÅr);     
+            Console.WriteLine("Genomsnittlig yrkeserfarenhet i år: " + Math.Round((summaYrkeserfarenhet/ col.Find(Query.Not("ErfarenhetÅr", 0)).Count()) ,2));
 
             // Genomsnittlig förhoppning på lön
-            //var totalFörväntadLön = col.Query().Select(s => s.FörväntadLön).ToList().Sum();
-            //Console.WriteLine("Genomsnittlig förväntad lön: " + totalFörväntadLön / antal);    // <------------ dividera med antal fullständiga svar, dvs inte 0 ?
-
+            Console.WriteLine("---------------------------------");
+            double summaLön = col.Find(Query.All("FörväntadLön")).Sum(x => x.FörväntadLön);
+            Console.WriteLine("Genomsnittlig förhoppning på lön: " + Math.Round((summaLön / col.Find(Query.Not("FörväntadLön", 0)).Count()), 2));
+                       
             // Antal miniräknare+kalkylator
-            // Antal unika projekt
-        }
+            Console.WriteLine("---------------------------------");
+            string[] miniräknare = { "Miniräknare", "miniräknare", "Kalkylator", "kalkylator" };
+            var antalMiniräknare = col.Find(x => miniräknare.Contains(x.Projekt)).Count();            
+            Console.WriteLine("Antal projekt som var miniräknare: " + antalMiniräknare);
 
+            // Antal unika projekt 
+            Console.WriteLine("---------------------------------");
+            List<string> uniqueProjects = new List<string>();
+            var allProjects = col.FindAll().Select(x => x.Projekt).ToList();
+
+            foreach (var project in allProjects)
+            {
+                if(!uniqueProjects.Contains(project.ToLower())) uniqueProjects.Add(project.ToLower());
+            }
+
+            Console.WriteLine("Antal unika projekt: " + uniqueProjects.Count());
+            //foreach (var project in uniqueProjects)
+            //{
+            //    Console.WriteLine(project);
+            //}
+        }
     }
 }
