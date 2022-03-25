@@ -74,6 +74,20 @@ namespace Inlämning1
             //    Console.WriteLine(svar.TidigareYrke + " " + svar.ErfarenhetÅr + " " + svar.FörväntadLön + " " + svar.Projekt);   
             //}
 
+            // Antal yrken
+            Console.WriteLine("---------------------------------");
+            List<string> uniqueProfessions = new List<string>();
+            var allProfessions = col.FindAll().Select(x => x.TidigareYrke).ToList();
+
+            foreach (var profession in allProfessions)
+            {
+                if (!string.IsNullOrEmpty(profession) && !uniqueProfessions.Contains(profession.ToLower()))
+                {
+                    uniqueProfessions.Add(profession.ToLower());
+                }
+            }
+            Console.WriteLine("Antal yrken: " + uniqueProfessions.Count());
+
             // Genomsnittlig yrkeserfarenhet i år
             Console.WriteLine("---------------------------------");
             double summaYrkeserfarenhet = col.Find(Query.All("ErfarenhetÅr")).Sum(x => x.ErfarenhetÅr);     
