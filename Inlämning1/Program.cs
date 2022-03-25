@@ -91,7 +91,7 @@ namespace Inlämning1
             // Genomsnittlig yrkeserfarenhet i år
             Console.WriteLine("---------------------------------");
             double summaYrkeserfarenhet = col.Find(Query.All("ErfarenhetÅr")).Sum(x => x.ErfarenhetÅr);     
-            Console.WriteLine("Genomsnittlig yrkeserfarenhet i år: " + Math.Round((summaYrkeserfarenhet/ col.Find(Query.Not("ErfarenhetÅr", 0)).Count()) ,2));
+            Console.WriteLine("Genomsnittlig yrkeserfarenhet i år: " + Math.Round((summaYrkeserfarenhet / col.Find(Query.Not("ErfarenhetÅr", 0)).Count()) ,2));
 
             // Genomsnittlig förhoppning på lön
             Console.WriteLine("---------------------------------");
